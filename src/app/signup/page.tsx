@@ -1,35 +1,38 @@
 "use client"
 import { initializeFirebaseApp } from "utils/firebase/firebase"
 import { NextPage } from "next"
-import { useState } from "react"
+import { FormEvent, useState } from "react"
 import { createUserWithEmailAndPassword, getAuth, sendEmailVerification } from "firebase/auth"
 import { FirebaseError } from "@firebase/util"
 
 
 initializeFirebaseApp()
 const SignUpPage: NextPage = () => {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState<string>("")
+  const [password, setPassword] = useState<string>("")
 
-  const handleSignUp = async () => {
+  const handleSignUp = async (event: FormEvent) => {
+    event.preventDefault()
+
     try {
       const auth = getAuth()
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await sendEmailVerification(userCredential.user)
+      setEmail("")
+      setPassword("")
     } catch (e) {
       if (e instanceof FirebaseError) {
         console.error(e)
       }
     }
 
-    setEmail("")
-    setPassword("")
+    return false
   }
 
   return (
     <main className="text-center">
       <h1 className="text-2xl font-bold">サインアップページ</h1>
-      <form className="mb-2 text-xl" onSubmit={ handleSignUp }>
+      <form className="mb-2 text-xl" onSubmit={(e) => handleSignUp(e)}>
         <div className="my-4">
           <p>メールアドレス</p>
           <input type="text" placeholder="Email address" className="input input-bordered input-warning w-full max-w-xs" onChange={(e) => setEmail(e.target.value)} />
